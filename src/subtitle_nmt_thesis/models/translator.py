@@ -14,8 +14,10 @@ class Translator:
         self.reranker = reranker
         self.context_builder = context_builder  # ponytail: reserved for future context-aware decoding
 
-    def translate(self, text: str, item=None, context: str = "") -> str:
+    def translate(self, text: str, item=None, context: str = "", constrained: bool = False, max_cpl: int = 42) -> str:
         input_text = context + text
+        if constrained:
+            return self.model.translate_constrained(input_text, max_cpl=max_cpl)
         if self.reranker:
             candidates = self.model.translate_n(input_text, n=self.reranker.num_candidates)
             ranked = self.reranker.rerank(candidates, item)

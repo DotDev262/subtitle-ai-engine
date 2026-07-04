@@ -22,12 +22,15 @@ class Pipeline:
         use_reranker: bool = True,
         num_candidates: int = 5,
         constraint_weights: dict[str, float] | None = None,
+        constrained_decoding: bool = False,
     ):
-        logger.info("Initializing pipeline (model=%s, cpl=%d, cps=%d, reranker=%s)",
-                     model_name, max_cpl, max_cps, use_reranker)
+        logger.info("Initializing pipeline (model=%s, cpl=%d, cps=%d, reranker=%s, constrained=%s)",
+                     model_name, max_cpl, max_cps, use_reranker, constrained_decoding)
+        self.max_cpl = max_cpl
+        self.constrained_decoding = constrained_decoding
         self.model = BaselineTranslator(model_name=model_name)
         self.context_builder = ContextBuilder(window_size=window_size)
-        if use_reranker:
+        if use_reranker and not constrained_decoding:
             constraints = {
                 "cpl": CPLConstraint(max_cpl=max_cpl).score,
                 "cps": CPSConstraint(max_cps=max_cps).score,
@@ -52,7 +55,10 @@ class Pipeline:
             logger.debug("[%d/%d] Translating: %s", i + 1, len(items), item.text[:50])
             ctx = self.context_builder.build(items, i)
             context_str = self.context_builder.format_context(ctx)
-            translated = self.translator.translate(item.text, item=item, context=context_str)
+            translated = self.translator.translate(
+                item.text, item=item, context=context_str,
+                constrained=self.constrained_decoding, max_cpl=self.max_cpl,
+            )
             translations.append(translated)
         translated_items = [
             SubtitleItem(id=item.id, start=item.start, end=item.end, text=t)
@@ -71,6 +77,8 @@ def main():
     parser.add_argument("--model", type=str, default="Helsinki-NLP/opus-mt-en-ROMANCE")
     parser.add_argument("--max-cpl", type=int, default=42)
     parser.add_argument("--max-cps", type=int, default=21)
+    parser.add_argument("--constrained-decoding", action="store_true", help="Use CPL logit processor instead of reranking")
     args = parser.parse_args()
-    pipeline = Pipeline(model_name=args.model, max_cpl=args.max_cpl, max_cps=args.max_cps)
+    pipeline = Pipeline(model_name=args.model, max_cpl=args.max_cpl, max_cps=args.max_cps,
+                        constrained_decoding=args.constrained_decoding)
     pipeline.run(args.input, args.output)
