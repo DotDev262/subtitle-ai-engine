@@ -1,4 +1,4 @@
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM
 from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 
 
@@ -18,6 +18,15 @@ def create_peft_model(
     return get_peft_model(model, peft_config)
 
 
+# ponytail: load_peft_model duplicates model load but keeps interface clean
 def load_peft_model(base_model_name: str, adapter_path: str):
     model = AutoModelForSeq2SeqLM.from_pretrained(base_model_name)
     return PeftModel.from_pretrained(model, adapter_path)
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Train PEFT adapter for subtitle translation")
+    parser.add_argument("--base-model", type=str, default="Helsinki-NLP/opus-mt-en-ROMANCE")
+    args = parser.parse_args()
+    print(f"PEFT training not yet implemented (base model: {args.base_model})")

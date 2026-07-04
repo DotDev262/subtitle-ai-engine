@@ -20,3 +20,11 @@ class Translator:
             ranked = self.reranker.rerank(candidates, item)
             return ranked[0][0]
         return self.model.translate(text)
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Translate subtitles using the pipeline")
+    parser.add_argument("input", type=str, help="Input SRT file")
+    args = parser.parse_args()
+    print(f"Translating {args.input} — use 'pipeline' command instead")

@@ -1,4 +1,5 @@
 class ReadabilityConstraint:
+    # ponytail: avg word length only; no syllable or sentence-length heuristics
     def score(self, text: str, item=None) -> float:
         words = text.split()
         if not words:

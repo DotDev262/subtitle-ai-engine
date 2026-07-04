@@ -3,7 +3,8 @@ class CPLConstraint:
         self.max_cpl = max_cpl
 
     def score(self, text: str, item=None) -> float:
+        total = 0.0
         for line in text.splitlines():
             if len(line) > self.max_cpl:
-                return (len(line) - self.max_cpl) / self.max_cpl
-        return 0.0
+                total += (len(line) - self.max_cpl) / self.max_cpl
+        return total

@@ -19,3 +19,11 @@ class BaselineTranslator:
             **inputs, num_return_sequences=n, num_beams=n, diversity_penalty=0.3, do_sample=True
         )
         return [self.tokenizer.decode(o, skip_special_tokens=True) for o in outputs]
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Train baseline NMT model for subtitle translation")
+    parser.add_argument("--model-name", type=str, default="Helsinki-NLP/opus-mt-en-ROMANCE")
+    args = parser.parse_args()
+    print(f"Baseline training not yet implemented (model: {args.model_name})")

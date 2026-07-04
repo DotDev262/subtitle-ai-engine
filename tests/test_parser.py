@@ -31,8 +31,8 @@ def test_write_srt():
         SubtitleItem(id=1, start=1.0, end=4.0, text="Hello."),
         SubtitleItem(id=2, start=5.0, end=8.0, text="World."),
     ]
-    with tempfile.NamedTemporaryFile(mode="r", suffix=".srt", delete=False) as f:
-        pass
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".srt", delete=False) as f:
+        f.write("")
     write_srt(items, f.name)
     written = Path(f.name).read_text()
     assert "Hello." in written

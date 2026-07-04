@@ -42,8 +42,17 @@ def split_long_subtitle(item: SubtitleItem, max_cpl: int = 42) -> list[SubtitleI
 
 def main():
     import argparse
+    from subtitle_nmt_thesis.data.parser import parse_srt, write_srt
+
     parser = argparse.ArgumentParser(description="Preprocess subtitle files")
     parser.add_argument("input", type=str, help="Input SRT file")
+    parser.add_argument("--output", type=str, default="output.srt", help="Output SRT path")
     parser.add_argument("--max-cpl", type=int, default=42, help="Max characters per line")
     args = parser.parse_args()
-    print(f"Preprocessing {args.input} with max_cpl={args.max_cpl}")
+    items = parse_srt(args.input)
+    cleaned = []
+    for item in items:
+        item.text = clean_text(item.text)
+        cleaned.extend(split_long_subtitle(item, max_cpl=args.max_cpl))
+    write_srt(cleaned, args.output)
+    print(f"Preprocessed {args.input} -> {args.output}: {len(items)} -> {len(cleaned)} subtitles")

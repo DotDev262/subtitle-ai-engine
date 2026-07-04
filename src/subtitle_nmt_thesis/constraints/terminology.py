@@ -1,3 +1,6 @@
+import re
+
+
 class TerminologyConstraint:
     def __init__(self, glossary: dict[str, str] | None = None, penalty: float = 1.0):
         self.glossary = glossary or {}
@@ -7,12 +10,9 @@ class TerminologyConstraint:
         lower = text.lower()
         total = 0.0
         for term, preferred in self.glossary.items():
-            if term.lower() in lower:
+            if re.search(r"\b" + re.escape(term.lower()) + r"\b", lower):
                 continue
-            if preferred.lower() in lower:
+            if preferred and re.search(r"\b" + re.escape(preferred.lower()) + r"\b", lower):
                 continue
-            for word in term.lower().split():
-                if word in lower:
-                    total += self.penalty
-                    break
+            total += self.penalty
         return total
