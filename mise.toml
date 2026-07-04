@@ -1,0 +1,22 @@
+[tools]
+python = "3.11"
+uv = "latest"
+
+[tasks]
+# --- Setup ---
+setup = "uv sync"
+
+# --- Code quality ---
+lint = "uv run ruff check ."
+format = "uv run ruff format ."
+typecheck = "uv run mypy src/"
+
+# --- Core pipeline steps ---
+preprocess = "uv run preprocess"
+train-baseline = "uv run train-baseline"
+train-peft = "uv run train-peft"
+translate = "uv run translate"
+evaluate = "uv run evaluate"
+
+# --- End-to-end experiment ---
+pipeline = "uv run pipeline"

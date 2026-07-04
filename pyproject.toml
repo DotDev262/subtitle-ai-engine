@@ -1,0 +1,67 @@
+[project]
+name = "subtitle-nmt-thesis"
+version = "0.1.0"
+description = "Multi-objective constraint-aware neural machine translation for educational subtitle localization"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "accelerate",
+    "sentencepiece",
+    "evaluate",
+    "sacrebleu",
+    "pandas",
+    "numpy",
+    "tqdm",
+    "pysrt",
+    "srt",
+    "pyyaml",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+
+[project.scripts]
+preprocess = "subtitle_nmt_thesis.data.preprocess:main"
+train-baseline = "subtitle_nmt_thesis.models.baseline:main"
+train-peft = "subtitle_nmt_thesis.models.peft:main"
+translate = "subtitle_nmt_thesis.models.translator:main"
+evaluate = "subtitle_nmt_thesis.evaluation.metrics:main"
+pipeline = "subtitle_nmt_thesis.pipeline.run:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+# ----------------------------
+# uv configuration
+# ----------------------------
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/subtitle_nmt_thesis"]
