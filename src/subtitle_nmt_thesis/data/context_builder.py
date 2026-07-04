@@ -25,3 +25,20 @@ class ContextBuilder:
             "topic": topic,
             "glossary": glossary or {},
         }
+
+    def format_context(self, ctx: dict) -> str:
+        parts = []
+        if ctx.get("previous"):
+            prev_text = " | ".join(s.text for s in ctx["previous"])
+            parts.append(f"[Previous: {prev_text}]")
+        if ctx.get("next"):
+            next_text = " | ".join(s.text for s in ctx["next"])
+            parts.append(f"[Next: {next_text}]")
+        if ctx.get("course"):
+            parts.append(f"[Course: {ctx['course']}]")
+        if ctx.get("topic"):
+            parts.append(f"[Topic: {ctx['topic']}]")
+        if ctx.get("glossary"):
+            gloss = "; ".join(f"{k} -> {v}" for k, v in ctx["glossary"].items())
+            parts.append(f"[Glossary: {gloss}]")
+        return " ".join(parts) + " " if parts else ""

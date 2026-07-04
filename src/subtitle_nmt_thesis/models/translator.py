@@ -14,12 +14,13 @@ class Translator:
         self.reranker = reranker
         self.context_builder = context_builder  # ponytail: reserved for future context-aware decoding
 
-    def translate(self, text: str, item=None) -> str:
+    def translate(self, text: str, item=None, context: str = "") -> str:
+        input_text = context + text
         if self.reranker:
-            candidates = self.model.translate_n(text, n=self.reranker.num_candidates)
+            candidates = self.model.translate_n(input_text, n=self.reranker.num_candidates)
             ranked = self.reranker.rerank(candidates, item)
             return ranked[0][0]
-        return self.model.translate(text)
+        return self.model.translate(input_text)
 
 
 def main():

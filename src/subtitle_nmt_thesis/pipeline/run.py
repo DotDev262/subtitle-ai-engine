@@ -50,7 +50,9 @@ class Pipeline:
         translations = []
         for i, item in enumerate(items):
             logger.debug("[%d/%d] Translating: %s", i + 1, len(items), item.text[:50])
-            translated = self.translator.translate(item.text, item=item)
+            ctx = self.context_builder.build(items, i)
+            context_str = self.context_builder.format_context(ctx)
+            translated = self.translator.translate(item.text, item=item, context=context_str)
             translations.append(translated)
         translated_items = [
             SubtitleItem(id=item.id, start=item.start, end=item.end, text=t)
