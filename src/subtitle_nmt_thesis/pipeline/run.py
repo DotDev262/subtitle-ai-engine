@@ -1,7 +1,6 @@
 from pathlib import Path
 from subtitle_nmt_thesis.data.parser import parse_srt, write_srt, SubtitleItem
 from subtitle_nmt_thesis.data.context_builder import ContextBuilder
-from subtitle_nmt_thesis.data.preprocess import clean_text
 from subtitle_nmt_thesis.models.baseline import BaselineTranslator
 from subtitle_nmt_thesis.constraints.cpl import CPLConstraint
 from subtitle_nmt_thesis.constraints.cps import CPSConstraint
@@ -51,7 +50,6 @@ class Pipeline:
         translations = []
         for i, item in enumerate(items):
             logger.debug("[%d/%d] Translating: %s", i + 1, len(items), item.text[:50])
-            ctx = self.context_builder.build(items, i)
             translated = self.translator.translate(item.text, item=item)
             translations.append(translated)
         translated_items = [
