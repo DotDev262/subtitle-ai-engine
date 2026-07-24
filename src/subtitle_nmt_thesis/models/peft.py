@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
-import torch
-from torch.utils.data import DataLoader
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -19,7 +19,7 @@ def create_peft_model(
     r: int = 8,
     lora_alpha: int = 32,
     target_modules: list[str] | None = None,
-):
+) -> PeftModel:
     model = AutoModelForSeq2SeqLM.from_pretrained(base_model_name)
     peft_config = LoraConfig(
         task_type=TaskType.SEQ_2_SEQ_LM,
@@ -31,21 +31,26 @@ def create_peft_model(
 
 
 # ponytail: load_peft_model duplicates model load but keeps interface clean
-def load_peft_model(base_model_name: str, adapter_path: str):
+def load_peft_model(base_model_name: str, adapter_path: str) -> PeftModel:
     model = AutoModelForSeq2SeqLM.from_pretrained(base_model_name)
     return PeftModel.from_pretrained(model, adapter_path)
 
 
 def load_parallel_data(path: str) -> Dataset:
-    pairs = []
+    pairs: list[dict[str, str]] = []
     for line in Path(path).read_text().strip().splitlines():
         if line.strip():
             pairs.append(json.loads(line))
     return Dataset.from_list(pairs)
 
 
-def preprocess_function(examples: dict, tokenizer, source_key: str = "source", target_key: str = "target",
-                        max_length: int = 128):
+def preprocess_function(
+    examples: dict,
+    tokenizer: AutoTokenizer,
+    source_key: str = "source",
+    target_key: str = "target",
+    max_length: int = 128,
+) -> dict:
     inputs = tokenizer(examples[source_key], truncation=True, max_length=max_length, padding=False)
     targets = tokenizer(examples[target_key], truncation=True, max_length=max_length, padding=False)
     inputs["labels"] = targets["input_ids"]
@@ -62,12 +67,15 @@ def train(
     max_length: int = 128,
     lora_r: int = 8,
     lora_alpha: int = 32,
-):
+) -> None:
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(base_model_name)
 
     peft_config = LoraConfig(
-        task_type=TaskType.SEQ_2_SEQ_LM, r=lora_r, lora_alpha=lora_alpha, target_modules=["q", "v"],
+        task_type=TaskType.SEQ_2_SEQ_LM,
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        target_modules=["q", "v"],
     )
     model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
@@ -105,7 +113,7 @@ def train(
     print(f"Adapter saved to {output_dir}")
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="Train PEFT adapter for subtitle translation")
     parser.add_argument("--base-model", type=str, default="Helsinki-NLP/opus-mt-en-ROMANCE")

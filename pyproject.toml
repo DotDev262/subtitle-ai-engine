@@ -13,6 +13,7 @@ dependencies = [
     "sentencepiece",
     "evaluate",
     "sacrebleu",
+    "unbabel-comet",
     "pandas",
     "peft",
     "numpy",
@@ -21,6 +22,8 @@ dependencies = [
     "srt",
     "pyyaml",
     "rich",
+    "sacremoses>=0.1.1",
+    "langdetect",
 ]
 
 [project.optional-dependencies]

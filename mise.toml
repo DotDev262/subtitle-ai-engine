@@ -3,12 +3,13 @@ python = "3.11"
 uv = "latest"
 
 [tasks]
+
 # --- Setup ---
 setup = "uv sync"
 
 # --- Code quality ---
-lint = "uv run ruff check ."
-format = "uv run ruff format ."
+lint = "uv run ruff check src/"
+format = "uv run ruff format src/"
 typecheck = "uv run mypy src/"
 
 # --- Core pipeline steps ---
@@ -20,3 +21,7 @@ evaluate = "uv run evaluate"
 
 # --- End-to-end experiment ---
 pipeline = "uv run pipeline"
+
+# --- Testing ---
+test = "uv run pytest tests/"
+test-watch = "uv run pytest tests/ --watch"

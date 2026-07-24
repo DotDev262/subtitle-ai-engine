@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from subtitle_nmt_thesis.data.parser import SubtitleItem
 
 
 class ContextBuilder:
-    def __init__(self, window_size: int = 2):
+    def __init__(self, window_size: int = 2) -> None:
         self.window_size = window_size
 
     def build(
@@ -27,7 +29,7 @@ class ContextBuilder:
         }
 
     def format_context(self, ctx: dict) -> str:
-        parts = []
+        parts: list[str] = []
         if ctx.get("previous"):
             prev_text = " | ".join(s.text for s in ctx["previous"])
             parts.append(f"[Previous: {prev_text}]")
