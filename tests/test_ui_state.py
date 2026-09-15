@@ -11,6 +11,7 @@ def test_device_status():
 def test_run_single_comparison():
     mock_model = MagicMock()
     mock_model.translate.return_value = "Unconstrained output that is quite lengthy and detailed."
+    mock_model.translate_n.return_value = ["Unconstrained output that is quite lengthy and detailed."]
     mock_model.translate_constrained.return_value = "Constrained output."
 
     res = run_single_comparison(

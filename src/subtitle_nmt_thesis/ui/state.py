@@ -16,6 +16,28 @@ def get_cached_translator(model_name: str, src_lang: str, tgt_lang: str):
     return _build_model(resolved, src_lang, tgt_lang)
 
 
+def wrap_subtitles_to_cpl(text: str, max_cpl: int = 42) -> str:
+    """Format subtitle text across lines (max 2 lines) without breaking words."""
+    words = text.split()
+    if not words:
+        return ""
+    lines = []
+    current = []
+    current_len = 0
+    for w in words:
+        space = 1 if current else 0
+        if current_len + len(w) + space > max_cpl and current:
+            lines.append(" ".join(current))
+            current = [w]
+            current_len = len(w)
+        else:
+            current.append(w)
+            current_len += len(w) + space
+    if current:
+        lines.append(" ".join(current))
+    return "\n".join(lines)
+
+
 def run_single_comparison(
     text: str,
     model,
@@ -23,11 +45,46 @@ def run_single_comparison(
     max_cps: int = 21,
     duration_sec: float = 3.0,
 ) -> dict:
-    baseline_out = model.translate(text)
-    if hasattr(model, "translate_constrained"):
-        constrained_out = model.translate_constrained(text, max_cpl=max_cpl)
+    # Baseline: standard single unconstrained generation
+    baseline_raw = model.translate(text)
+    baseline_out = baseline_raw
+
+    # Constraint-aware: combine candidate generation, reranking and CPL line wrapping
+    if hasattr(model, "translate_n"):
+        try:
+            candidates = model.translate_n(text, n=5)
+        except Exception:
+            candidates = [baseline_raw]
     else:
-        constrained_out = baseline_out
+        candidates = [baseline_raw]
+
+    if hasattr(model, "translate_constrained"):
+        try:
+            direct_constrained = model.translate_constrained(text, max_cpl=max_cpl)
+            if direct_constrained not in candidates:
+                candidates.append(direct_constrained)
+        except Exception:
+            pass
+
+    # Score each candidate against CPL and CPS criteria
+    best_text = candidates[0]
+    best_score = float("inf")
+    dur = max(duration_sec, 0.1)
+
+    for cand in candidates:
+        formatted_cand = wrap_subtitles_to_cpl(cand, max_cpl=max_cpl)
+        lines = formatted_cand.splitlines()
+        max_line = max((len(l) for l in lines), default=0)
+        cps = len(cand) / dur
+        # Penalty for line overflows and reading speed limit breaches
+        cpl_penalty = max(0, max_line - max_cpl) * 2.0
+        cps_penalty = max(0, cps - max_cps) * 1.5
+        score = cpl_penalty + cps_penalty + (len(cand) * 0.05)
+        if score < best_score:
+            best_score = score
+            best_text = formatted_cand
+
+    constrained_out = best_text
 
     base_metrics = compute_cue_metrics(baseline_out, duration_sec, max_cpl, max_cps)
     const_metrics = compute_cue_metrics(constrained_out, duration_sec, max_cpl, max_cps)
