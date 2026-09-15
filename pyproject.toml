@@ -24,6 +24,7 @@ dependencies = [
     "rich",
     "sacremoses>=0.1.1",
     "langdetect",
+    "streamlit>=1.35.0",
 ]
 
 [project.optional-dependencies]
@@ -40,6 +41,7 @@ train-peft = "subtitle_nmt_thesis.models.peft:main"
 translate = "subtitle_nmt_thesis.models.translator:main"
 evaluate = "subtitle_nmt_thesis.evaluation.metrics:main"
 pipeline = "subtitle_nmt_thesis.pipeline.run:main"
+ui = "subtitle_nmt_thesis.ui.app:run_app"
 
 [tool.ruff]
 line-length = 100
