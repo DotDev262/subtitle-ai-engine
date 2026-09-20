@@ -52,6 +52,10 @@ def _detect_and_route(input_path: Path, model_name: str, src_lang: str, tgt_lang
 
 
 def _build_model(model_name: str, src_lang: str, tgt_lang: str):
+    if model_name.startswith("ai4bharat/indictrans2") or model_name == "indictrans2":
+        from subtitle_nmt_thesis.models.indictrans import IndicTransTranslator
+
+        return IndicTransTranslator(src_lang=src_lang, tgt_lang=tgt_lang)
     return BaselineTranslator(model_name=model_name)
 
 
