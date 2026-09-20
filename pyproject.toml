@@ -43,6 +43,7 @@ translate = "subtitle_nmt_thesis.models.translator:main"
 evaluate = "subtitle_nmt_thesis.evaluation.metrics:main"
 pipeline = "subtitle_nmt_thesis.pipeline.run:main"
 ui = "subtitle_nmt_thesis.ui.app:run_app"
+download-dataset = "subtitle_nmt_thesis.data.download_cli:main"
 
 [tool.ruff]
 line-length = 100
