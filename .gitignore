@@ -2,8 +2,47 @@ docs/
 !docs/superpowers/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Environments and caches
+.venv/
+.env
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
 .superpowers/
-.ruff_cache
-.pytest_cache
-.mypy_cache
-.venv
+
+# Dataset and benchmark downloads
+data/
+datasets/
+*.jsonl
+!tests/data/*.jsonl
+
+# Model weights, checkpoints, and fine-tuning outputs
+checkpoints/
+models/
+*.pt
+*.bin
+*.safetensors
+my-adapter/
+lora-*/
+
+# Temporary runtime and video/subtitle artifacts
+*.srt
+*.vtt
+!assets/*.srt
+!assets/*.vtt
+output.srt
+sample.srt
+translated*.srt
+
+# IDE, OS, and local indexing tools
+.zvec-grep/
+.opencode/
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
