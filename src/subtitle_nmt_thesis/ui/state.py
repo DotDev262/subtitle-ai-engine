@@ -38,6 +38,12 @@ def wrap_subtitles_to_cpl(text: str, max_cpl: int = 42) -> str:
     return "\n".join(lines)
 
 
+from subtitle_nmt_thesis.constraints.linguistic_wrapper import wrap_subtitles_syntactic
+from subtitle_nmt_thesis.constraints.completeness import CompletenessConstraint
+
+completeness_scorer = CompletenessConstraint(penalty=3.0)
+
+
 def run_single_comparison(
     text: str,
     model,
@@ -49,7 +55,7 @@ def run_single_comparison(
     baseline_raw = model.translate(text)
     baseline_out = baseline_raw
 
-    # Constraint-aware: combine candidate generation, reranking and CPL line wrapping
+    # Constraint-aware: combine candidate generation, reranking and syntactic line wrapping
     if hasattr(model, "translate_n"):
         try:
             candidates = model.translate_n(text, n=5)
@@ -66,20 +72,25 @@ def run_single_comparison(
         except Exception:
             pass
 
-    # Score each candidate against CPL and CPS criteria
+    # Score each candidate against CPL, CPS and Completeness criteria
     best_text = candidates[0]
     best_score = float("inf")
     dur = max(duration_sec, 0.1)
 
     for cand in candidates:
-        formatted_cand = wrap_subtitles_to_cpl(cand, max_cpl=max_cpl)
+        formatted_cand = wrap_subtitles_syntactic(cand, max_cpl=max_cpl, max_lines=2)
         lines = formatted_cand.splitlines()
         max_line = max((len(l) for l in lines), default=0)
         cps = len(cand) / dur
-        # Penalty for line overflows and reading speed limit breaches
-        cpl_penalty = max(0, max_line - max_cpl) * 2.0
-        cps_penalty = max(0, cps - max_cps) * 1.5
-        score = cpl_penalty + cps_penalty + (len(cand) * 0.05)
+        
+        cpl_penalty = max(0, max_line - max_cpl) * 3.0
+        cps_penalty = max(0, cps - max_cps) * 2.0
+        complete_penalty = completeness_scorer.score(cand)
+        
+        # Penalize line counts exceeding standard 2 lines
+        line_count_penalty = max(0, len(lines) - 2) * 5.0
+        
+        score = cpl_penalty + cps_penalty + complete_penalty + line_count_penalty + (len(cand) * 0.02)
         if score < best_score:
             best_score = score
             best_text = formatted_cand
