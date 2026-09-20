@@ -10,17 +10,26 @@ class CPLLogitsProcessor(LogitsProcessor):
 
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
         if self.tokenizer is None:
-            if input_ids.shape[-1] > int(self.max_cpl / 2.0):
-                scores[:, self.eos_token_id] += 50.0
+            max_tokens = int(self.max_cpl / 2.0)
+            cur_tokens = input_ids.shape[-1]
+            if cur_tokens >= max_tokens:
+                scores[:, self.eos_token_id] += 25.0
             return scores
 
         for i in range(input_ids.shape[0]):
             decoded_str = self.tokenizer.decode(input_ids[i], skip_special_tokens=True)
             lines = decoded_str.splitlines()
             last_line_len = len(lines[-1]) if lines else 0
+            
+            # Progressive encouragement as line length nears or exceeds threshold
             if last_line_len >= self.max_cpl:
-                scores[i, :] = -float("inf")
-                scores[i, self.eos_token_id] = 50.0
+                # Strong boost to EOS rather than complete vocabulary destruction
+                scores[i, self.eos_token_id] += 30.0
+                # Dampen long non-terminal tokens
+                scores[i, :] -= 5.0
+            elif last_line_len >= int(self.max_cpl * 0.85):
+                # Gentle boost to allow model to find clean final punct/verb
+                scores[i, self.eos_token_id] += 8.0
         return scores
 
 
