@@ -46,3 +46,7 @@ translated*.srt
 *~
 .DS_Store
 Thumbs.db
+
+# Frontend dependencies and generated bundles
+src/ui/node_modules/
+src/ui/dist/
