@@ -10,6 +10,64 @@ uv sync
 
 Or with mise: `mise install && mise run setup`
 
+## Run the React frontend and Python backend
+
+The UI is a Vite + React application in `src/ui`. The translation pipeline stays
+in Python and is exposed through the standard-library JSON API in
+`src/subtitle_nmt_thesis/api.py`. Streamlit is no longer used.
+
+### 1. Install Python dependencies
+
+From the repository root:
+
+```powershell
+uv sync
+```
+
+If the local uv-managed Python runtime is unavailable, install Python 3.11+
+and run the equivalent commands with your Python executable.
+
+### 2. Start the backend
+
+In terminal 1:
+
+```powershell
+uv run backend
+```
+
+The API listens on [http://127.0.0.1:8000](http://127.0.0.1:8000).
+You can change the port with `SUBTITLE_API_PORT=8001`.
+
+### 3. Start the React frontend
+
+In terminal 2:
+
+```powershell
+cd src/ui
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+Vite proxies `/api` requests to the Python backend automatically.
+
+The **Model playground** calls the real `/api/translate` endpoint. The first
+translation can take longer because the Hugging Face model may need to download
+and load into memory. The backend keeps the loaded pipeline in memory, so later
+requests with the same model and language pair avoid that startup cost. CPU mode
+works by default; CUDA is used automatically when a compatible PyTorch
+installation and GPU are available.
+
+### Production preview
+
+```powershell
+cd src/ui
+npm run build
+npm run preview
+```
+
+Stop either process with `Ctrl+C` in its terminal.
+
 ## Usage
 
 ### Quick start (auto-detect language + model)
