@@ -56,6 +56,8 @@ class IndicTransTranslator:
         try:
             raw_tok = huggingface_hub.get_token()
             if raw_tok:
+                # Verify that the token is valid and not expired
+                huggingface_hub.whoami(token=raw_tok)
                 tok = raw_tok
         except Exception:
             tok = None
@@ -63,6 +65,8 @@ class IndicTransTranslator:
         load_kwargs = {"trust_remote_code": True}
         if tok is None:
             load_kwargs["token"] = False
+        else:
+            load_kwargs["token"] = tok
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, **load_kwargs)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(
