@@ -51,9 +51,22 @@ class IndicTransTranslator:
         else:
             self.model_name = "ai4bharat/indictrans2-indic-en-dist-200m"
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
+        import huggingface_hub
+        tok = None
+        try:
+            raw_tok = huggingface_hub.get_token()
+            if raw_tok:
+                tok = raw_tok
+        except Exception:
+            tok = None
+
+        load_kwargs = {"trust_remote_code": True}
+        if tok is None:
+            load_kwargs["token"] = False
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, **load_kwargs)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(
-            self.model_name, trust_remote_code=True
+            self.model_name, **load_kwargs
         ).to(self.device)
         self.eos_id = self.tokenizer.eos_token_id or 2
 
@@ -81,10 +94,10 @@ class IndicTransTranslator:
             outputs, skip_special_tokens=True, clean_up_tokenization_spaces=True
         )
 
-    def translate(self, text: str) -> str:
+    def translate(self, text: str, source_lang: str = "", target_lang: str = "") -> str:
         return self._generate([text], num_beams=5)[0]
 
-    def translate_n(self, text: str, n: int = 5) -> list[str]:
+    def translate_n(self, text: str, n: int = 5, source_lang: str = "", target_lang: str = "") -> list[str]:
         return self._generate([text], num_beams=n, num_return_sequences=n)
 
     def translate_constrained(self, text: str, max_cpl: int = 42) -> str:

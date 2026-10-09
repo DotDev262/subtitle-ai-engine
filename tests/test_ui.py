@@ -1,8 +1,11 @@
+from unittest.mock import patch, MagicMock
 from subtitle_nmt_thesis.ui.app import build_pipeline_instance
 from subtitle_nmt_thesis.ui.state import get_device_status
 
 
-def test_pipeline_factory():
+@patch("subtitle_nmt_thesis.pipeline.run._build_model")
+def test_pipeline_factory(mock_build):
+    mock_build.return_value = MagicMock()
     pipeline = build_pipeline_instance(max_cpl=40, max_cps=20, src_lang="en", tgt_lang="hi")
     assert pipeline.max_cpl == 40
     assert pipeline.src_lang == "en"

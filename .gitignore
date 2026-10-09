@@ -21,7 +21,8 @@ datasets/
 
 # Model weights, checkpoints, and fine-tuning outputs
 checkpoints/
-models/
+/models/
+!src/subtitle_nmt_thesis/models/
 *.pt
 *.bin
 *.safetensors

@@ -13,8 +13,8 @@ from subtitle_nmt_thesis.utils.lang_detector import detect_language
 logger = setup_logger("pipeline")
 
 PAIR_MODELS = {
-    ("en", "hi"): "Helsinki-NLP/opus-mt-en-hi",
-    ("hi", "en"): "Helsinki-NLP/opus-mt-hi-en",
+    ("en", "hi"): "indictrans2",
+    ("hi", "en"): "indictrans2",
 }
 
 
