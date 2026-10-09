@@ -10,6 +10,7 @@ from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
+from subtitle_nmt_thesis.ui.state import run_single_comparison
 from subtitle_nmt_thesis.ui.utils.metrics_helper import compute_cue_metrics
 
 _PIPELINE_LOCK = threading.Lock()
@@ -83,22 +84,23 @@ class ApiHandler(BaseHTTPRequestHandler):
                 pipeline = _get_pipeline(
                     model_name, max_cpl, max_cps, src_lang, tgt_lang
                 )
-                baseline = pipeline.model.translate(text)
-                constrained = pipeline.model.translate_constrained(
-                    text, max_cpl=max_cpl
+                comparison = run_single_comparison(
+                    text=text,
+                    model=pipeline.model,
+                    max_cpl=max_cpl,
+                    max_cps=max_cps,
+                    duration_sec=duration,
                 )
             self._send(
                 HTTPStatus.OK,
                 {
                     "baseline": {
-                        "text": baseline,
-                        "metrics": compute_cue_metrics(baseline, duration, max_cpl, max_cps),
+                        "text": comparison["baseline_text"],
+                        "metrics": comparison["baseline_metrics"],
                     },
                     "constrained": {
-                        "text": constrained,
-                        "metrics": compute_cue_metrics(
-                            constrained, duration, max_cpl, max_cps
-                        ),
+                        "text": comparison["constrained_text"],
+                        "metrics": comparison["constrained_metrics"],
                     },
                 },
             )
